@@ -208,7 +208,6 @@ public class WebSocketProxy {
             this.targetSession = session;
             log.info("[ProxyHandler {}] connected to endpoint: {}", session.getId(), targetUrl);
             log.info("[ProxyHandler {}] is ready to proxy requests for [Client {}]", session.getId(), clientSession.getId());
-            sendMessageToClient("Connection Established", true);
             
             // Register message handlers since non-annotated ClientEndpoint (class that extends Endpoint) 
             // does not call onMessage without it being registered to session. 
