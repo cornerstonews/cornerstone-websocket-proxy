@@ -84,7 +84,7 @@ public class WebSocketProxy {
      * so it can close related target connection. 
      * 
      * @param session - the session about to be closed.
-     * @param closeReason - the reason the session was closed.
+     * @param reason - the reason the session was closed.
      */
     public void onClose(Session session, CloseReason reason) {
         log.info("[Client {}] session has been closed.", session.getId());
@@ -119,6 +119,7 @@ public class WebSocketProxy {
      * 
      * @param session - the session that is sending the message.
      * @param message - text message.
+     * @param isLast  - flag to indicate if this message is the last of the whole message being delivered.
      * 
      */
     public void onMessage(Session session, String message, boolean isLast) {
@@ -131,6 +132,7 @@ public class WebSocketProxy {
      * 
      * @param session - the session that is sending the message.
      * @param message - binary message.
+     * @param isLast  - flag to indicate if this message is the last of the whole message being delivered.
      * 
      */
     public void onMessage(Session session, ByteBuffer message, boolean isLast) {
@@ -198,10 +200,9 @@ public class WebSocketProxy {
          * On successful connection to the target, it lets the client know the handshake
          * was successful by sending 'Connection Established' text message.
          * 
-         * @param targetSession - the session that has just been activated.
-         * @param config        - the configuration used to configure this endpoint.
+         * @param session - the session that has just been activated.
+         * @param config  - the configuration used to configure this endpoint.
          * 
-         * @throws IOException if error occurs while connecting to target
          */
 //        @OnOpen
         public void onOpen(Session session, EndpointConfig config) {
@@ -220,8 +221,8 @@ public class WebSocketProxy {
          * This method will be invoked when the target closes a WebSocket connection. 
          * This method will call close related client connection.
          * 
-         * @param session     - the session about to be closed.
-         * @param closeReason - the reason the session was closed.
+         * @param session  - the session about to be closed.
+         * @param reason   - the reason the session was closed.
          */
 //        @OnClose
         public void OnClose(Session session, CloseReason reason) {
@@ -250,6 +251,7 @@ public class WebSocketProxy {
          * 
          * @param session - the session that is sending the message.
          * @param message - text message.
+         * @param isLast  - flag to indicate if this message is the last of the whole message being delivered.
          * 
          */
 //        @OnMessage
@@ -272,6 +274,7 @@ public class WebSocketProxy {
          * 
          * @param session - the session that is sending the message.
          * @param message - binary message.
+         * @param isLast  - flag to indicate if this message is the last of the whole message being delivered.
          * 
          */
 //        @OnMessage
