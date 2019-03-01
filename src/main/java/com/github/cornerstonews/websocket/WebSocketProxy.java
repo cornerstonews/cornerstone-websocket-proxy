@@ -143,7 +143,7 @@ public class WebSocketProxy {
     // ------------------------------------------------------
     // Client side message handling
     // ------------------------------------------------------
-    private void closeClientConnection() {
+    protected void closeClientConnection() {
         try {
             log.trace("[Client {}] Closing client session.", this.clientSession.getId());
             if (this.clientSession.isOpen()) {
@@ -156,7 +156,7 @@ public class WebSocketProxy {
         }
     }
 
-    private void sendMessageToClient(String message, boolean isLast) {
+    protected void sendMessageToClient(String message, boolean isLast) {
         try {
             log.trace("Sending received text message: '{}' from [Target {}] -> [Client {}]", message, this.sessionHandler.getTargetSessionId(), this.clientSession.getId());
             this.clientSession.getBasicRemote().sendText(message, isLast);
@@ -170,7 +170,7 @@ public class WebSocketProxy {
         }
     }
 
-    private void sendMessageToClient(ByteBuffer message, boolean isLast) {
+    protected void sendMessageToClient(ByteBuffer message, boolean isLast) {
         try {
             log.trace("Sending received binary message: '{}' from [Target {}] -> [Client {}]", message, this.sessionHandler.getTargetSessionId(), this.clientSession.getId());
             this.clientSession.getBasicRemote().sendBinary(message, isLast);
