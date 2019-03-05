@@ -32,18 +32,34 @@ public class WebSocketProxy {
     private Session clientSession;
     private SessionHandler sessionHandler;
     private ClientEndpointConfig clientEndpointConfig;
+    private boolean wholeTextMessageSupport = false;
+    private boolean wholeBinaryMessageSupport = false;
+    private int textBufferSize = 8192; // 8 Bytes, default for tomcat
+    private int binaryBufferSize = 8192; // 8 Bytes, default for tomcat
     
     public WebSocketProxy(Session session, String targetUrl) throws URISyntaxException, IOException {
         this(session, targetUrl, null);
     }
     
+    public WebSocketProxy(Session session, String targetUrl, boolean wholeTextMessageSupport, Integer textBufferSize, boolean wholeBinaryMessageSupport, Integer binaryBufferSize) throws URISyntaxException, IOException {
+        this(session, targetUrl, null, wholeTextMessageSupport, textBufferSize, wholeBinaryMessageSupport, binaryBufferSize);
+    }
+    
     public WebSocketProxy(Session session, String targetUrl, ClientEndpointConfig cec) throws URISyntaxException, IOException {
+        this(session, targetUrl, cec, false, null, false, null);
+    }
+    
+    public WebSocketProxy(Session session, String targetUrl, ClientEndpointConfig cec, boolean wholeTextMessageSupport, Integer textBufferSize, boolean wholeBinaryMessageSupport, Integer binaryBufferSize) throws URISyntaxException, IOException {
         this.clientSession = Objects.requireNonNull(session, "Client session must not be null");
         if (!this.clientSession.isOpen()) {
             throw new IOException("Client session must be open");
         }
         this.clientEndpointConfig = cec;
         this.targetUrl = new URI(targetUrl);
+        this.wholeTextMessageSupport = wholeTextMessageSupport;
+        this.wholeBinaryMessageSupport = wholeBinaryMessageSupport;
+        this.textBufferSize = (textBufferSize == null || textBufferSize <= 8192) ? this.textBufferSize : textBufferSize;
+        this.binaryBufferSize = (binaryBufferSize == null || binaryBufferSize <= 8192) ? this.binaryBufferSize : binaryBufferSize;
     }
     
     /**
@@ -210,11 +226,51 @@ public class WebSocketProxy {
             log.info("[ProxyHandler {}] connected to endpoint: {}", session.getId(), targetUrl);
             log.info("[ProxyHandler {}] is ready to proxy requests for [Client {}]", session.getId(), clientSession.getId());
             
+            registerMessageHandlers(this, session);
+        }
+        
+        private void registerMessageHandlers(SessionHandler sessionHandler, Session session) {
             // Register message handlers since non-annotated ClientEndpoint (class that extends Endpoint) 
             // does not call onMessage without it being registered to session. 
             // Annotated (@ClientEndpoint) does not need this.
-            session.addMessageHandler(getPartialStringOnMessageHandler(this, session));
-            session.addMessageHandler(getPartialByteBufferOnMessageHandler(this, session));
+            
+            // Handling incoming text messages (
+            if(wholeTextMessageSupport) {
+                session.setMaxTextMessageBufferSize(textBufferSize);
+                session.addMessageHandler(new MessageHandler.Whole<String>() {
+                    @Override
+                    public void onMessage(String wholeMessage) {
+                        log.trace("[ProxyHandler {}] Whole<String>: has received text message: {}", session.getId(), wholeMessage);
+                        sessionHandler.onMessage(session,  wholeMessage, true);
+                    }
+                });
+            } else {
+                session.addMessageHandler(new MessageHandler.Partial<String>() {
+                    @Override
+                    public void onMessage(String partialMessage, boolean last) {
+                        log.trace("[ProxyHandler {}] Partial<String>: has received text message: {}", session.getId(), partialMessage);
+                        sessionHandler.onMessage(session,  partialMessage, last);
+                    }
+                });
+            }
+            
+            // Handling incoming binary messages
+            if(wholeBinaryMessageSupport) {
+                session.setMaxTextMessageBufferSize(binaryBufferSize);
+                session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
+                    @Override
+                    public void onMessage(ByteBuffer wholeMessage) {
+                        sessionHandler.onMessage(session,  wholeMessage, true);
+                    }
+                });
+            } else {
+                session.addMessageHandler(new MessageHandler.Partial<ByteBuffer>() {
+                    @Override
+                    public void onMessage(ByteBuffer partialMessage, boolean last) {
+                        sessionHandler.onMessage(session,  partialMessage, last);
+                    }
+                });
+            }
         }
 
         /**
@@ -259,15 +315,6 @@ public class WebSocketProxy {
             log.debug("[ProxyHandler {}] has received text message: {}", session.getId(), message);
             sendMessageToClient(message, isLast);
         }
-
-        private MessageHandler.Partial<String> getPartialStringOnMessageHandler(SessionHandler sessionHandler, Session session) {
-            return new MessageHandler.Partial<String>() {
-                @Override
-                public void onMessage(String partialMessage, boolean last) {
-                    sessionHandler.onMessage(session,  partialMessage, last);
-                }
-            };
-        }
         
         /**
          * This method should be invoked each time server receives a binary WebSocket message.
@@ -281,15 +328,6 @@ public class WebSocketProxy {
         public void onMessage(Session session, ByteBuffer message, boolean isLast) {
             log.debug("[ProxyHandler {}] has received binary message", session.getId());
             sendMessageToClient(message, isLast);
-        }
-        
-        private MessageHandler.Partial<ByteBuffer> getPartialByteBufferOnMessageHandler(SessionHandler sessionHandler, Session session) {
-            return new MessageHandler.Partial<ByteBuffer>() {
-                @Override
-                public void onMessage(ByteBuffer partialMessage, boolean last) {
-                    sessionHandler.onMessage(session,  partialMessage, last);
-                }
-            };
         }
         
         // ------------------------------------------------------
