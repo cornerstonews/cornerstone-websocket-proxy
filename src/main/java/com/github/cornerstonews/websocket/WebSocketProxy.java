@@ -120,7 +120,7 @@ public class WebSocketProxy {
     public void onError(Session session, Throwable t) {
         String message = t.getMessage();
         if(t.getCause() instanceof UnresolvedAddressException) {
-            message = "Can not connect to target '" + this.targetUrl + "' due to unresoved address.";
+            message = "Can not connect to target '" + this.targetUrl + "' due to unresolved address.";
         }
         log.debug("[Client {}] Error has been detected. Error: {} ", session.getId(), message);
         log.trace("[Client {}] Stacktrace: ", session.getId(), t);
@@ -256,7 +256,7 @@ public class WebSocketProxy {
             
             // Handling incoming binary messages
             if(wholeBinaryMessageSupport) {
-                session.setMaxTextMessageBufferSize(binaryBufferSize);
+                session.setMaxBinaryMessageBufferSize(binaryBufferSize);
                 session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
                     @Override
                     public void onMessage(ByteBuffer wholeMessage) {
@@ -353,7 +353,7 @@ public class WebSocketProxy {
                 log.debug("Successfully sent received text message from [Client {}] -> [Target {}]", clientSession.getId(), this.targetSession.getId());
             } catch (IOException e) {
                 log.error("[Target {}] Error while sending text message to target. Error: {}", this.targetSession.getId(), e.getMessage());
-                log.trace("[Target {}] Stacktrace: ", clientSession.getId(), e);
+                log.trace("[Target {}] Stacktrace: ", this.targetSession.getId(), e);
 
                 this.closeTargetConnection();
                 closeClientConnection();
@@ -367,7 +367,7 @@ public class WebSocketProxy {
                 log.debug("Successfully sent received binary message from [Client {}] -> [Target {}]", clientSession.getId(), this.targetSession.getId());
             } catch (IOException e) {
                 log.error("[Target {}] Error while sending binary message to target. Error: {}", this.targetSession.getId(), e.getMessage());
-                log.trace("[Target {}] Stacktrace: ", clientSession.getId(), e);
+                log.trace("[Target {}] Stacktrace: ", this.targetSession.getId(), e);
 
                 this.closeTargetConnection();
                 closeClientConnection();
