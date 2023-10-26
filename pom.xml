@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>cornerstone-websocket-proxy</artifactId>
+    <version>1.4.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>cornerstone-websocket-proxy</name>
     <description>Library to proxy websockets</description>
