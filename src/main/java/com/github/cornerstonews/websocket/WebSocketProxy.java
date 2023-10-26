@@ -122,8 +122,8 @@ public class WebSocketProxy {
         if(t.getCause() instanceof UnresolvedAddressException) {
             message = "Can not connect to target '" + this.targetUrl + "' due to unresolved address.";
         }
-        log.debug("[Client {}] Error has been detected. Error: {} ", session.getId(), message);
-        log.trace("[Client {}] Stacktrace: ", session.getId(), t);
+        log.debug("[Client {}] Error has been detected", session.getId());
+        log.trace("[Client {}] Error: {}, Stacktrace: ", session.getId(), message, t);
         
         // Close target side connection
         this.sessionHandler.closeTargetConnection();
@@ -223,7 +223,8 @@ public class WebSocketProxy {
 //        @OnOpen
         public void onOpen(Session session, EndpointConfig config) {
             this.targetSession = session;
-            log.info("[ProxyHandler {}] connected to endpoint: {}", session.getId(), targetUrl);
+            log.info("[ProxyHandler {}] connected to endpoint", session.getId());
+            log.trace("[ProxyHandler {}] Endpoint: {}", session.getId(), targetUrl);
             log.info("[ProxyHandler {}] is ready to proxy requests for [Client {}]", session.getId(), clientSession.getId());
             
             registerMessageHandlers(this, session);
