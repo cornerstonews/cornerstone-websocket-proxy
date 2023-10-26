@@ -139,7 +139,8 @@ public class WebSocketProxy {
      * 
      */
     public void onMessage(Session session, String message, boolean isLast) {
-        log.debug("[Client {}] has received text message: {}", session.getId(), message);
+        log.debug("[Client {}] has received text message", session.getId());
+        log.trace("[Client {}] has received text message: {}", session.getId(), message);
         this.sessionHandler.sendMessageToTarget(message, isLast);
     }
 
@@ -152,7 +153,8 @@ public class WebSocketProxy {
      * 
      */
     public void onMessage(Session session, ByteBuffer message, boolean isLast) {
-        log.debug("[Client {}] has received a binary message: {}", session.getId(), message);
+        log.debug("[Client {}] has received a binary message", session.getId());
+        log.trace("[Client {}] has received a binary message: {}", session.getId(), message);
         this.sessionHandler.sendMessageToTarget(message, isLast);
     }
 
@@ -313,7 +315,8 @@ public class WebSocketProxy {
          */
 //        @OnMessage
         public void onMessage(Session session, String message, boolean isLast) {
-            log.debug("[ProxyHandler {}] has received text message: {}", session.getId(), message);
+            log.debug("[ProxyHandler {}] has received text message", session.getId());
+            log.trace("[ProxyHandler {}] has received text message: {}", session.getId(), message);
             sendMessageToClient(message, isLast);
         }
         
