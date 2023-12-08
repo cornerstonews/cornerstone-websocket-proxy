@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>cornerstone-websocket-proxy</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.1</version>
     <packaging>jar</packaging>
     <name>cornerstone-websocket-proxy</name>
     <description>Library to proxy websockets</description>
@@ -19,7 +19,7 @@
         <connection>scm:git:git@github.com:cornerstonews/cornerstone-websocket-proxy.git</connection>
         <developerConnection>scm:git:git@github.com:cornerstonews/cornerstone-websocket-proxy.git</developerConnection>
         <url>https://github.com/cornerstonews/cornerstone-websocket-proxy</url>
-        <tag>cornerstone-websocket-proxy-1.4.0</tag>
+        <tag>cornerstone-websocket-proxy-1.4.1</tag>
   </scm>
 
     <properties>
